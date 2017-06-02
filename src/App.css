@@ -1,8 +1,21 @@
 body {
-  background-color: #aaaaaa;
+  background-color: #FFFFFF;
 }
 
 .hello {
-  color: #FFFFFF;
+  /*color: #FFFFFF;*/
   text-align: center;
+}
+
+.selectUser {
+  text-align: center;
+  margin-left: 35px;
+}
+
+.DayPicker-Day--past {
+  background-color: #f7f8f8;
+}
+
+.DayPicker-Day--approved {
+  background-color: #aaffaa;
 }

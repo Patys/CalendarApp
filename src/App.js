@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
 import './App.css';
-
-var currentTime = new Date().getDate().toString();
+import Calendar from './Calendar';
 
 class App extends Component {
   render() {
     return (
-      <div className="hello">
-        <h1>Calendar {currentTime}</h1>
+      <div className="app">
+        <div className="hello">
+          <h1>Calendar</h1>
+        </div>
+        <div className="calendar">
+          <Calendar />
+        </div>
       </div>
     );
   }
