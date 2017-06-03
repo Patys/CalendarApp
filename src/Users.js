@@ -1,4 +1,5 @@
 import React from 'react';
+import ApiRequest from './ApiRequest';
 
 class Users extends React.Component {
   // constructor(props) {
@@ -11,20 +12,13 @@ class Users extends React.Component {
     current_user: ''
   }
 
-  getUsers = () => {
-    fetch(`https://timesheet-staging-aurity.herokuapp.com/api/users`)
-    .then((response) => {
-        return response.json();
-      }).then((json) => {
-        this.setState({users: json});
-        this.forceUpdate();
-      }).catch((ex) => {
-        console.log('parsing failed', ex);
-      });
-  }
-
   componentWillMount = () => {
-    this.getUsers();
+    ApiRequest.getUsers((data) => {
+      this.setState({users: data});
+    });
+    ApiRequest.getDataForAMonth(1,4,2017, (data) => {
+      console.log(data);
+    });
   }
 
   handleChange = (event) => {
