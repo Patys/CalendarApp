@@ -33,10 +33,11 @@ class Calendar extends React.Component {
   handleDayClick = (day, modifiers) => {
     this.setState({
       selectedDay: day,
+    }, () => {
+      this.getApproved();
+      this.getRejected();
+      this.setHours();
     });
-    this.getApproved();
-    this.getRejected();
-    this.setHours();
   }
 
   getApproved = () => {
@@ -98,6 +99,7 @@ class Calendar extends React.Component {
   }
 
   setHours = () => {
+    console.log(this.state.selectedDay.getMonth());
     ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
       if(data.errors) return;
       data.data.weeks.forEach((week) => {
