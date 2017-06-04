@@ -165,7 +165,6 @@ class Calendar extends React.Component {
         />
         <div className="info">
           <p>The selected day is { this.state.selectedDay.toLocaleDateString() }</p>
-          <p>It is {this.weekOfYear(this.state.selectedDay)} week of year</p>
           <p>Hours: {this.state.hours} Minutes: {this.state.minutes}</p>
           <button onClick={this.approveWeek}>Approve</button>
           <button onClick={this.rejectWeek}>Reject</button>
