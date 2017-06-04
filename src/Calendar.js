@@ -52,7 +52,6 @@ class Calendar extends React.Component {
         }
       });
       this.setState({approvedDays: days});
-
     });
     // return days;
   }
@@ -99,7 +98,6 @@ class Calendar extends React.Component {
   }
 
   setHours = () => {
-    console.log(this.state.selectedDay.getMonth());
     ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
       if(data.errors) return;
       data.data.weeks.forEach((week) => {
@@ -134,6 +132,16 @@ class Calendar extends React.Component {
     return this.state.current_user;
   }
 
+  onMonthChange = (date) => {
+    this.setState({
+      selectedDay: date,
+    }, () => {
+      this.getApproved();
+      this.getRejected();
+      this.setHours();
+    });
+  }
+
   render = () => {
     return (
       <div>
@@ -148,6 +156,7 @@ class Calendar extends React.Component {
         </div>
         <DayPicker
           onDayClick={this.handleDayClick}
+          onMonthChange={this.onMonthChange}
           modifiers={ {
             selected: new Date(this.state.selectedDay),
             approved: this.state.approvedDays,
