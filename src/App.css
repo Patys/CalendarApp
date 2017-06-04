@@ -2,6 +2,10 @@ body {
   background-color: #FFFFFF;
 }
 
+.users {
+  text-align: center;
+}
+
 .hello {
   /*color: #FFFFFF;*/
   text-align: center;
@@ -18,4 +22,12 @@ body {
 
 .DayPicker-Day--approved {
   background-color: #aaffaa;
+}
+
+.DayPicker-Day--rejected {
+  background-color: #ffaaaa;
+}
+
+.info {
+  text-align: center;
 }

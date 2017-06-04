@@ -4,35 +4,113 @@ import DayPicker from "react-day-picker";
 import "react-day-picker/lib/style.css";
 import "./App.css";
 
-import Users from './Users';
+import ApiRequest from './ApiRequest';
 
 class Calendar extends React.Component {
-  state = {
-    selectedDay: new Date(),
-    value: ''
+  constructor(props) {
+    super(props);
+     ApiRequest.getUsers((data) => {
+      this.setState({users: data}, ()=> {
+        this.setState({current_user: this.state.users[0].id});
+      });
+    });
+    this.getApproved();
+    this.getRejected();
   }
 
-  users = null
+  state = {
+    selectedDay: new Date(),
+    users: [],
+    current_user: '',
+    current_week_id: null,
+    hours: 0,
+    minutes: 0,
+    approvedDays: [],
+    rejectedDays: []
+  }
+  dayPicker = null
 
-  handleDayClick = (day, { selected }) => {
+  handleDayClick = (day, modifiers) => {
     this.setState({
       selectedDay: day,
     });
-    this.getTimeFromServer(day);
+    this.getApproved();
+    this.getRejected();
+    this.setHours();
   }
 
-  getTimeFromServer = (day) => {
-    console.log(this.weekOfYear(day));
+  getApproved = () => {
+    let days = [];
+    ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
+      if(data.errors) return;
+      data.data.weeks.forEach((week) => {
+        if(week.status === 'approved') {
+          week.days_in_week.forEach((day) => {
+            days.push(new Date(data.data.year, data.data.month-1, day.day_number));
+          });
+        }
+      });
+      this.setState({approvedDays: days});
 
-    // fetch(`https://timesheet-staging-aurity.herokuapp.com/api/users`)
-    // .then((response) => {
-    //     return response.json();
-    //   }).then((json) => {
-    //     this.setState({users: json});
-    //     this.forceUpdate();
-    //   }).catch((ex) => {
-    //     console.log('parsing failed', ex);
-    //   });
+    });
+    // return days;
+  }
+
+  getRejected = () => {
+    let days = [];
+    ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
+      if(data.errors) return;
+      data.data.weeks.forEach((week) => {
+        if(week.status === 'rejected') {
+          week.days_in_week.forEach((day) => {
+            days.push(new Date(data.data.year, data.data.month-1, day.day_number));
+          });
+        }
+      });
+      this.setState({rejectedDays: days});
+    });
+
+    // return days;
+  }
+
+  approveWeek = () => {
+    if(this.state.current_week_id) {
+      ApiRequest.approveWeek(this.state.current_week_id, this.getCurrentUser(), (data) => {
+        console.log(data);
+        this.getApproved();
+        this.getRejected();
+      });
+    } else {
+      console.log('no week id');
+    }
+  }
+
+  rejectWeek = () => {
+    if(this.state.current_week_id) {
+      ApiRequest.rejectWeek(this.state.current_week_id, this.getCurrentUser(), (data) => {
+        console.log(data);
+        this.getApproved();
+        this.getRejected();
+      });
+    } else {
+      console.log('no week id');
+    }
+  }
+
+  setHours = () => {
+    ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
+      if(data.errors) return;
+      data.data.weeks.forEach((week) => {
+        if(week.week_number === this.weekOfYear(this.state.selectedDay)) {
+          this.setState({current_week_id: week.week_id});
+          week.days_in_week.forEach((day) => {
+            if(day.day_number === this.state.selectedDay.getDate()){
+              this.setState({hours: day.hours, minutes: day.minutes});
+            }
+          });
+        }
+      });
+    });
   }
 
   weekOfYear = (date) => {
@@ -42,22 +120,45 @@ class Calendar extends React.Component {
     return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
   }
 
+
+  handleUserChange = (event) => {
+    this.setState({current_user: event.target.value}, () => {
+      this.getApproved();
+      this.getRejected();
+    });
+  }
+
+  getCurrentUser = () => {
+    return this.state.current_user;
+  }
+
   render = () => {
     return (
       <div>
-        <Users ref={ (el) => {this.users = el}}/>
+        <div className="users">
+          <select className="selectUser" value={this.state.current_user} onChange={this.handleUserChange}>
+            {
+              this.state.users.map((data,index) => {
+                return <option key={index} value={data.id}>{data.username}</option>
+              })
+            }
+          </select>
+        </div>
         <DayPicker
           onDayClick={this.handleDayClick}
           modifiers={ {
-            past: { before: new Date() },
-            selected: new Date(this.state.selectedDay)
+            selected: new Date(this.state.selectedDay),
+            approved: this.state.approvedDays,
+            rejected: this.state.rejectedDays
           } }
         />
-        <p>The selected day is { this.state.selectedDay.toLocaleDateString() }</p>
-        <input type="number" min="0" max="24" placeholder="Hours"></input>
-        <input type="number" min="0" max="59" placeholder="Minutes"></input>
-        <button>Approve</button>
-        <button>Reject</button>
+        <div className="info">
+          <p>The selected day is { this.state.selectedDay.toLocaleDateString() }</p>
+          <p>It is {this.weekOfYear(this.state.selectedDay)} week of year</p>
+          <p>Hours: {this.state.hours} Minutes: {this.state.minutes}</p>
+          <button onClick={this.approveWeek}>Approve</button>
+          <button onClick={this.rejectWeek}>Reject</button>
+        </div>
       </div>
     );
   }

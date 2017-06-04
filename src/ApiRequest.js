@@ -24,6 +24,7 @@ class ApiRequest {
 
   static approveWeek = (week_id, user_id, next) => {
     let url = 'https://timesheet-staging-aurity.herokuapp.com/api/training/weeks/'+week_id+'/users/' + user_id;
+    console.log('Request to ' + url);
     let formData = new FormData();
     formData.append('status', 'approved');
     fetch(url, {
@@ -41,6 +42,7 @@ class ApiRequest {
 
   static rejectWeek = (week_id, user_id, next) => {
     let url = 'https://timesheet-staging-aurity.herokuapp.com/api/training/weeks/'+week_id+'/users/' + user_id;
+    console.log('Request to ' + url);
     let formData = new FormData();
     formData.append('status', 'rejected');
     fetch(url, {
