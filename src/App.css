@@ -21,6 +21,20 @@ body {
   margin: 0 auto;
 }
 
+.myDay {
+  font-weight: bold;
+}
+
+.myDay .hours {
+  font-weight: lighter;
+  font-size: 10px;
+}
+
+.myDay .minutes {
+  font-weight: lighter;
+  font-size: 10px;
+}
+
 .DayPicker-Day--past {
   background-color: #f7f8f8;
 }

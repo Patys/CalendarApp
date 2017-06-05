@@ -11,8 +11,15 @@ class Calendar extends React.Component {
     super(props);
      ApiRequest.getUsers((data) => {
       this.setState({users: data, current_user: data[0].id}, ()=> {
-        this.getApproved();
-        this.getRejected();
+        ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
+          if(data.errors) return;
+          else
+            this.setState({monthData: data}, () => {
+              this.getApproved();
+              this.getRejected();
+              this.setHours();
+            });
+        });
       });
     });
   }
@@ -25,7 +32,8 @@ class Calendar extends React.Component {
     hours: 0,
     minutes: 0,
     approvedDays: [],
-    rejectedDays: []
+    rejectedDays: [],
+    monthData: null
   }
   dayPicker = null
 
@@ -33,9 +41,15 @@ class Calendar extends React.Component {
     this.setState({
       selectedDay: day,
     }, () => {
-      this.getApproved();
-      this.getRejected();
-      this.setHours();
+      ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
+        if(data.errors) return;
+        else
+          this.setState({monthData: data}, () => {
+            this.getApproved();
+            this.getRejected();
+            this.setHours();
+          });
+      });
     });
   }
 
@@ -122,8 +136,15 @@ class Calendar extends React.Component {
 
   handleUserChange = (event) => {
     this.setState({current_user: event.target.value}, () => {
-      this.getApproved();
-      this.getRejected();
+      ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
+        if(data.errors) return;
+        else
+          this.setState({monthData: data}, () => {
+            this.getApproved();
+            this.getRejected();
+            this.setHours();
+          });
+      });
     });
   }
 
@@ -135,10 +156,36 @@ class Calendar extends React.Component {
     this.setState({
       selectedDay: date,
     }, () => {
-      this.getApproved();
-      this.getRejected();
-      this.setHours();
+      ApiRequest.getDataForAMonth(this.getCurrentUser(), this.state.selectedDay.getMonth()+1, 2017, (data) => {
+        if(data.errors) return;
+        else
+          this.setState({monthData: data}, () => {
+            this.getApproved();
+            this.getRejected();
+            this.setHours();
+          });
+      });
     });
+  }
+
+  renderDay = (currentDay) => {
+    if(this.state.monthData) {
+      let hours = 0;
+      let minutes = 0;
+      this.state.monthData.data.weeks.forEach((week) => {
+        if(week.week_number === this.weekOfYear(currentDay)) {
+          week.days_in_week.forEach((day) => {
+            if(day.day_number === currentDay.getDate()){
+              hours = day.hours;
+              minutes = day.minutes;
+            }
+          });
+        }
+      });
+        return <div className="myDay">{currentDay.getDate()} <div className="hours">{hours} hours</div><div className="minutes">{minutes} min</div></div>;
+    } else {
+      return <div>{currentDay.getDate()}</div>;
+    }
   }
 
   render = () => {
@@ -154,6 +201,7 @@ class Calendar extends React.Component {
           </select>
         </div>
         <DayPicker
+          renderDay={this.renderDay}
           onDayClick={this.handleDayClick}
           onMonthChange={this.onMonthChange}
           modifiers={ {
