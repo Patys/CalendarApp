@@ -10,12 +10,11 @@ class Calendar extends React.Component {
   constructor(props) {
     super(props);
      ApiRequest.getUsers((data) => {
-      this.setState({users: data}, ()=> {
-        this.setState({current_user: this.state.users[0].id});
+      this.setState({users: data, current_user: data[0].id}, ()=> {
+        this.getApproved();
+        this.getRejected();
       });
     });
-    this.getApproved();
-    this.getRejected();
   }
 
   state = {
