@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "react": "^15.5.4",
+    "react-dom": "^15.5.4",
     "react-day-picker": "^5.5.3"
   },
   "devDependencies": {
